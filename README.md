@@ -1,8 +1,13 @@
-# iHash
-自作 hash ライブラリ。（しょぼい）   
-ihash の i は ishihata の i です。（重要）   
+# ihash
 
-## Methods
+自作 hash ライブラリ。（しょぼい）   
+内部で [ilist][ilist], [iutil][iutil] を使ってます。 
+iHoge の i は ishihata の i です。（重要）   
+
+[ilist]: https://github.com/masakazu-ishihata/ilist "ilist"
+[iutil]: https://github.com/masakazu-ishihata/iutil "iutil"
+
+## methods
 ### new/free
 
     ihash *ihash_new(size_t _size);
