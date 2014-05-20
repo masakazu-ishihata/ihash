@@ -3,6 +3,7 @@
 /*----------------------------------------------------------------------------*/
 /* ihashpair */
 /*----------------------------------------------------------------------------*/
+/* new, free */
 ihashpair *ihashpair_new(const char *_key, void *_val)
 {
   ihashpair *ihp;
@@ -25,6 +26,53 @@ void ihashpair_free_func(ihashpair *_ihp, void (*free_func)(void *))
     free(_ihp);
   }
 }
+/* comp */
+int ihashpair_comp_key(ihashpair *_a, ihashpair *_b)
+{
+  char *p, *q;
+
+  p = _a->key;
+  q = _b->key;
+
+  while(p!='\0' && q!='\0'){
+    if(*p != *q) return *p < *q;
+    p++;
+    q++;
+  }
+  return strcmp(_a->key, _b->key);
+}
+int ihashpair_comp_val_int(ihashpair *_a, ihashpair *_b)
+{
+  int a, b;
+
+  a = *(int *)(_a->val);
+  b = *(int *)(_b->val);
+  if(a == b) return ihashpair_comp_key(_a, _b);
+  else       return a < b;
+}
+int ihashpair_comp_val_double(ihashpair *_a, ihashpair *_b)
+{
+  double a, b;
+
+  a = *(double *)(_a->val);
+  b = *(double *)(_b->val);
+  if(a == b) return ihashpair_comp_key(_a, _b);
+  else       return a < b;
+}
+int ihashpair_comp_val_str(ihashpair *_a, ihashpair *_b)
+{
+  char *p, *q;
+  p = _a->val;
+  q = _b->val;
+
+  while(p!='\0' && q!='\0'){
+    if(*p != *q) return *p < *q;
+    p++;
+    q++;
+  }
+  return strcmp(_a->val, _b->val);
+}
+
 
 /*----------------------------------------------------------------------------*/
 /* ihash */
@@ -68,18 +116,25 @@ void ihash_free_func(ihash *_ih, void (*free_func)(void *))
   }
 }
 
-/* hashvalue */
+/*------------------------------------*/
+/* hash value */
+/*------------------------------------*/
 size_t ihash_hashval(ihash *_ih, const char *_key)
 {
   int i;
   size_t hv = 0;
 
   for(i=0; i<strlen(_key); i++){
-    hv = ((i+1) * (hv+1) * _key[i]) % _ih->size;
+    hv = (i+1) * (hv+1) * (( hv + _ih->size + _key[i]) % _key[i]);
+    hv %= _ih->size;
   }
 
   return hv;
 }
+
+/*------------------------------------*/
+/* accessor */
+/*------------------------------------*/
 /* get val of key */
 void *ihash_get(ihash *_ih, const char *_key)
 {
@@ -87,7 +142,6 @@ void *ihash_get(ihash *_ih, const char *_key)
   ihashpair *ihp;
 
   il = _ih->list[ ihash_hashval(_ih, _key) ];
-
   for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il)){
     if(strcmp(_key, ihp->key) == 0){
       return ihp->val;
@@ -99,29 +153,108 @@ void *ihash_get(ihash *_ih, const char *_key)
 int ihash_set(ihash *_ih, const char *_key, void *_val)
 {
   ilist *il;
+  ihashpair *ihp;
 
   /* already member */
   if(ihash_get(_ih, _key) != NULL) return -1;
 
   /* new member */
   il = _ih->list[ ihash_hashval(_ih, _key) ];
-  ilist_push(il, (void *)ihashpair_new(_key, _val));
-  _ih->item++;
+  ihp = ihashpair_new(_key, _val);
+  ilist_push(il, ihp);
 
-  return 0;
+  return ++_ih->item;
 }
-/* show hash keys */
-void ihash_show(ihash *_ih, FILE *fp)
+/* delete [key, val] */
+void *ihash_delete(ihash *_ih, const char *_key)
 {
-  int i, j;
   ilist *il;
   ihashpair *ihp;
+  void *val;
 
-  fprintf(fp, "HASH SIZE = %d\n", _ih->size);
-  for(i=0; i<_ih->size; i++){
-    il = _ih->list[i];
-    for(j=0, ihp=ilist_head(il); ihp!=NULL; j++, ihp=ilist_succ(il)){
-      fprintf(fp, "[%3d,%3d] %s\n", i+1, j+1, ihp->key);
+  il = _ih->list[ ihash_hashval(_ih, _key) ];
+  for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il)){
+    if(strcmp(_key, ihp->key) == 0){
+      ilist_remove(il);
+      val = ihp->val;
+      ihashpair_free(ihp);
+      return val;
     }
   }
+  return NULL;
+}
+/* size */
+size_t ihash_size(ihash *_ih)
+{
+  return _ih->size;
+}
+/* item */
+size_t ihash_item(ihash *_ih)
+{
+  return _ih->item;
+}
+
+/*------------------------------------*/
+/* pairs */
+/*------------------------------------*/
+ilist *ihash_get_pairs(ihash *_ih)
+{
+  int i;
+  ilist *l, *il;
+  ihashpair *ihp;
+
+  l = ilist_new();
+  for(i=0; i<_ih->size; i++){
+    il = _ih->list[i];
+    for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il)){
+      ilist_push(l, ihp);
+    }
+  }
+  return l;
+}
+ilist *ihash_get_keys(ihash *_ih)
+{
+  int i;
+  ilist *l, *il;
+  ihashpair *ihp;
+
+  l = ilist_new();
+  for(i=0; i<_ih->size; i++){
+    il = _ih->list[i];
+    for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il)){
+      ilist_push(l, ihp->key);
+    }
+  }
+  return l;
+}
+ilist *ihash_get_vals(ihash *_ih)
+{
+  int i;
+  ilist *l, *il;
+  ihashpair *ihp;
+
+  l = ilist_new();
+  for(i=0; i<_ih->size; i++){
+    il = _ih->list[i];
+    for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il)){
+      ilist_push(l, ihp->val);
+    }
+  }
+  return l;
+}
+
+/*------------------------------------*/
+/* show */
+/*------------------------------------*/
+void ihash_show(ihash *_ih, FILE *fp)
+{
+  ilist *l;
+  ihashpair *ihp;
+
+  fprintf(fp, "HASH SIZE = %d\n", (int)_ih->size);
+  l = ihash_get_pairs(_ih);
+  while((ihp = ilist_shift(l)) != NULL){
+    fprintf(fp, "h[%s] = %d\n", ihp->key, *((int *)ihp->val));
+  }
+  ilist_free(l);
 }
