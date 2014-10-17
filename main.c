@@ -15,7 +15,7 @@ int main(void)
   /* add key & val */
   for(i=0; i<10; i++){
     sprintf(key, "key%d", i);
-    val = (int *)imalloc(sizeof(int), "main");
+    val = (int *)malloc(sizeof(int));
     val[0] = i;
 
     printf("add %s as %d\n", key, *val);

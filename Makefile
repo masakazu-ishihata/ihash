@@ -1,12 +1,12 @@
 # Makefile
 CC = gcc -O6 -Wall -g
-L = -lm -lilist -liutil
+L = -lm -lilist -liutil -listring
 TAR = test
 OBJS = main.o ihash.o
 SHAD = -fPIC -shared
 LIB = libihash.so
 
-all : $(TAR)
+all : $(TAR) lib
 $(TAR): $(OBJS)
 	  $(CC) -o $@ $(OBJS) $(L)
 clean:

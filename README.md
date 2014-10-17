@@ -1,7 +1,7 @@
 # ihash
 
 自作 hash ライブラリ。（しょぼい）   
-内部で [ilist][ilist], [iutil][iutil] を使ってます。 
+内部で [ilist][ilist], [iutil][iutil] を使ってます。  
 iHoge の i は ishihata の i です。（重要）   
 
 [ilist]: https://github.com/masakazu-ishihata/ilist "ilist"
