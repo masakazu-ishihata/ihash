@@ -51,9 +51,11 @@ void  *ihash_delete(ihash *_ih, const char *_key);
 size_t ihash_size(ihash *_ih);
 size_t ihash_item(ihash *_ih);
 size_t ihash_hashval(ihash *_ih, const char *_key);
-ilist *ihash_get_pairs(ihash *_ih);
-ilist *ihash_get_keys(ihash *_ih);
-ilist *ihash_get_vals(ihash *_ih);
+
+/* list */
+void ihash_get_pairs(ihash *_ih, ilist *_l);
+void ihash_get_keys(ihash *_ih, ilist *_l);
+void ihash_get_vals(ihash *_ih, ilist *_l);
 
 /* show */
 void ihash_show(FILE *_fp, ihash *_ih);

@@ -1,6 +1,6 @@
 # Makefile
 CC = gcc -O6 -Wall -g
-L = -lm -lilist -liutil -listring
+L = -lm -lilist -listring
 TAR = test
 OBJS = main.o ihash.o
 SHAD = -fPIC -shared

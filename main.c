@@ -4,7 +4,6 @@
 
 int main(void)
 {
-  ilist *il;
   ihash *ih;
   ihashpair *ihp;
   char key[256];
@@ -29,11 +28,12 @@ int main(void)
   free(val);
 
   /* pairs */
-  il = ihash_get_pairs(ih);
+  ilist *il = ilist_new();
+  ihash_get_pairs(ih, il);
   ilist_sort(il, (void *)ihashpair_comp_key);
-  for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il)){
+  for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il))
     printf("h[%s] = %d\n", ihp->key, *((int *)ihp->val));
-  }
+  ilist_free(il);
 
   /* free */
   ihash_free_func(ih, free);
