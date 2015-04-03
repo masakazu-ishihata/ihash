@@ -19,14 +19,9 @@ struct IHASHPAIR
   void *val;
 };
 /* new, free */
-ihashpair *ihashpair_new(const char *_key, void *_val);
-void ihashpair_free(void *_ihp);
-void ihashpair_free_func(void *_ihp, void (*free_func)(void *));
-/* comp */
-int ihashpair_comp_key(void *_a, void *_b);
-int ihashpair_comp_val_int(void *_a, void *_b);
-int ihashpair_comp_val_double(void *_a, void *_b);
-int ihashpair_comp_val_string(void *_a, void *_b);
+ihashpair *ihashpair_new(void);
+void ihashpair_free(void *_p);
+void ihashpair_free_func(void *_p, void (*free_func)(void *));
 
 /*----------------------------------------------------------------------------*/
 /* ihash */
@@ -34,30 +29,39 @@ int ihashpair_comp_val_string(void *_a, void *_b);
 typedef struct IHASH ihash;
 struct IHASH
 {
-  size_t size;
-  size_t item;
-  ilist **list;
+  size_t size;  /* size of hash table */
+  size_t item;  /* # items */
+  size_t used;  /* # used hash value */
+  ilist **list; /* hash table */
 };
 
-/* new, free */
+/* new, free, clear, show */
 ihash *ihash_new(size_t _size);
-void   ihash_free(ihash *_ih);
-void   ihash_free_func(ihash *_ih, void (*free_func)(void *));
+ihash *ihash_alloc(size_t _size);
+void ihash_clear(ihash *_ih);
+void ihash_clear_func(ihash *_ih, void (*free_func)(void *));
+void ihash_free(void *_p);
+void ihash_free_func(void *_p, void (*free_func)(void *));
+void ihash_show(FILE *_fp, ihash *_ih);
 
-/* accessors */
-void  *ihash_get(ihash *_ih, const char *_key);
-int    ihash_set(ihash *_ih, const char *_key, void *_val);
-void  *ihash_delete(ihash *_ih, const char *_key);
+/* values */
 size_t ihash_size(ihash *_ih);
 size_t ihash_item(ihash *_ih);
+double ihash_hitrate(ihash *_ih);
+double ihash_occupancy(ihash *_ih);
+
+/* accessors */
 size_t ihash_hashval(ihash *_ih, const char *_key);
+void *ihash_get(ihash *_ih, const char *_key);
+int ihash_set(ihash *_ih, const char *_key, void *_val);
+void *ihash_delete(ihash *_ih, const char *_key);
 
-/* list */
-void ihash_get_pairs(ihash *_ih, ilist *_l);
-void ihash_get_keys(ihash *_ih, ilist *_l);
-void ihash_get_vals(ihash *_ih, ilist *_l);
+/* realloc */
+void ihash_realloc(ihash *_ih, size_t _size);
 
-/* show */
-void ihash_show(FILE *_fp, ihash *_ih);
+/* hash -> list */
+void ihash_pairs(ihash *_ih, ilist *_l);
+void ihash_keys(ihash *_ih, ilist *_l);
+void ihash_vals(ihash *_ih, ilist *_l);
 
 #endif

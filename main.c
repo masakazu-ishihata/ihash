@@ -5,20 +5,17 @@
 int main(void)
 {
   ihash *ih;
-  ihashpair *ihp;
   char key[256];
   int i, *val;
 
-  ih = ihash_new(100);
+  ih = ihash_new(10);
 
   /* add key & val */
   for(i=0; i<10; i++){
     sprintf(key, "key%d", i);
-    val = (int *)malloc(sizeof(int));
-    val[0] = i;
+    val  = int_new(i);
 
     printf("add %s as %d\n", key, *val);
-
     ihash_set(ih, key, val);
   }
 
@@ -27,13 +24,12 @@ int main(void)
   val = ihash_delete(ih, "key0");
   free(val);
 
-  /* pairs */
-  ilist *il = ilist_new();
-  ihash_get_pairs(ih, il);
-  ilist_sort(il, (void *)ihashpair_comp_key);
-  for(ihp=ilist_head(il); ihp!=NULL; ihp=ilist_succ(il))
-    printf("h[%s] = %d\n", ihp->key, *((int *)ihp->val));
-  ilist_free(il);
+  /* show */
+  ihash_show(stdout, ih);
+
+  /* realloc */
+  ihash_realloc(ih, 20);
+  ihash_show(stdout, ih);
 
   /* free */
   ihash_free_func(ih, free);
