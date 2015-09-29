@@ -64,7 +64,7 @@ ihash *ihash_alloc(size_t _size)
 }
 
 /*------------------------------------*/
-/* free */
+/* clear */
 /*------------------------------------*/
 void ihash_clear(ihash *_ih)
 {
@@ -79,11 +79,13 @@ void ihash_clear_func(ihash *_ih, void (*free_func)(void *))
   int i;
   ihashpair *ihp;
 
+  /* reset table */
   if(_ih != NULL)
     for(i=0; i<_ih->size; i++)
-      ILIST_WHILE(ihp, _ih->list[i])
+      ILIST_WHILE(_ih->list[i], ihp)
         ihashpair_free_func(ihp, free_func);
 
+  /* reset counters */
   _ih->item = 0;
   _ih->used = 0;
 }
@@ -129,7 +131,7 @@ void ihash_show(FILE *_fp, ihash *_ih)
   fprintf(_fp, "# USED HV = %d\n", (int)_ih->used);
   fprintf(_fp, "   HV,        KEY,        VAL\n");
   for(hv=0; hv<_ih->size; hv++)
-    ILIST_FOR(ihp, _ih->list[hv])
+    ILIST_FOR(_ih->list[hv], ihp)
       fprintf(_fp, "%5d, %10s, %10p\n", hv, ihp->key, ihp->val);
 }
 
@@ -197,7 +199,7 @@ void *ihash_get(ihash *_ih, const char *_key)
   ihashpair *ihp;
   ilist *il = _ih->list[ ihash_hashval(_ih, _key) ];
 
-  ILIST_FOR(ihp, il)
+  ILIST_FOR(il, ihp)
     if(strcmp(_key, ihp->key) == 0)
       return ihp->val;
 
@@ -218,7 +220,7 @@ int ihash_set(ihash *_ih, const char *_key, void *_val)
   ilist *il = _ih->list[ ihash_hashval(_ih, _key) ];
 
   /* break if _key is already in _ih */
-  ILIST_FOR(ihp, il)
+  ILIST_FOR(il, ihp)
     if(strcmp(_key, ihp->key) == 0)
       return -1;
 
@@ -246,7 +248,7 @@ void *ihash_delete(ihash *_ih, const char *_key)
   ilist *il = _ih->list[ ihash_hashval(_ih, _key) ];;
   void *val;
 
-  ILIST_FOR(ihp, il){
+  ILIST_FOR(il, ihp){
     if(strcmp(_key, ihp->key) == 0){
       ilist_remove(il);
       val = ihp->val;
@@ -280,7 +282,7 @@ void ihash_realloc(ihash *_ih, size_t _size)
 
   /* old -> new */
   for(i=0; i<old_size; i++){
-    ILIST_WHILE(ihp, old_list[i]){
+    ILIST_WHILE(old_list[i], ihp){
       hv = ihash_hashval(_ih, ihp->key);
       il = _ih->list[hv];
       ilist_push(il, ihp);
@@ -305,7 +307,7 @@ void ihash_pairs(ihash *_ih, ilist *_l)
   ihashpair *ihp;
 
   for(i=0; i<_ih->size; i++){
-    ILIST_FOR(ihp, _ih->list[i]){
+    ILIST_FOR(_ih->list[i], ihp){
       ilist_push(_l, ihp->key);
       ilist_push(_l, ihp->val);
     }
@@ -321,7 +323,7 @@ void ihash_keys(ihash *_ih, ilist *_keys)
   ihashpair *ihp;
 
   for(i=0; i<_ih->size; i++)
-    ILIST_FOR(ihp, _ih->list[i])
+    ILIST_FOR(_ih->list[i], ihp)
       ilist_push(_keys, ihp->key);
 }
 
@@ -334,6 +336,6 @@ void ihash_vals(ihash *_ih, ilist *_vals)
   ihashpair *ihp;
 
   for(i=0; i<_ih->size; i++)
-    ILIST_FOR(ihp, _ih->list[i])
+    ILIST_FOR(_ih->list[i], ihp)
       ilist_push(_vals, ihp->val);
 }

@@ -39,6 +39,10 @@ _ih を free する。
 
 _ih のサイズを _size に変更する。  
 
+    size_t ihash_size(ihash *_ih)
+    size_t ihash_item(ihash *_ih)
+
+_ih のサイズ/の要素数を返す。
 
 ### get/set/delete
 
@@ -62,9 +66,9 @@ val は free されない。
 
 ### list
 
-    void ihash_get_keys(ihash *_ih, ilist *_l);
-    void ihash_get_vals(ihash *_ih, ilist *_l);
-    void ihash_get_pairs(ihash *_ih, ilist *_l);
+    void ihash_keys(ihash *_ih, ilist *_l);
+    void ihash_vals(ihash *_ih, ilist *_l);
+    void ihash_pairs(ihash *_ih, ilist *_l);
 
 list _l に ih 内の key/val/pair を格納する。  
 list の中身は key/val/pair へのポインタである。  
